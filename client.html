@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+  <style type="text/css">
+    .input, .output, textarea {
+      white-space: pre-wrap;
+      font-family: "Courier", monospace;
+    }
+    textarea {
+      border: none;
+      width: 100%;
+      font-size: 1em;
+      height: 1em;
+      font-weight: bold;
+    }
+    textarea:before {
+      content: ">";
+    }
+    textarea:focus {
+      outline: none;
+      content: ">";
+    }
+  </style>
+  <script type="text/javascript">
+    var context;
+    var setup = function() {
+      context = document.createElement("iframe");
+      context.src = "context.html";
+      context.style.display = "none";
+      document.body.appendChild(context);
+      
+      document.getElementById("entry").focus()
+    }
+    var processInput = function(elem) {
+      var js = elem.value;
+      var out = context.contentWindow.evaluateString(js);
+      
+      if (out) {
+        var outDiv = document.createElement("div");
+        outDiv.className = "output";
+        outDiv.innerText = out;
+      }
+      
+      var notebook = document.getElementById("notebook")
+      notebook.insertBefore(outDiv, elem.nextSibling)
+      
+      var newEntry = document.createElement("textarea")
+      newEntry.onkeypress = function(){ return checkEnter(this, event) }
+      notebook.appendChild(newEntry)
+      newEntry.focus()
+    }
+    var checkEnter = function(elem, evt) {
+      var keynum = evt.keyCode;
+      // if (keynum == 13 && evt.shiftKey) {
+      if (keynum == 13 && !evt.shiftKey) {
+        processInput(elem)
+        return false;
+      }
+      return true;
+    }
+  </script>
+</head>
+<body onload="setup()">
+  <div id="notebook">
+    <textarea onkeypress="return checkEnter(this, event)"></textarea>
+  </div>
+</body>
